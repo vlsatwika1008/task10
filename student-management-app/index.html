@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html ng-app="studentApp">
+<head>
+    <title>Student App</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.2/angular.min.js"></script>
+</head>
+<body ng-controller="StudentController" style="padding:20px; font-family:sans-serif;">
+
+    <h2>Add Student</h2>
+    <input type="text" ng-model="newStudent.name" placeholder="Name">
+    <input type="number" ng-model="newStudent.age" placeholder="Age">
+    <input type="text" ng-model="newStudent.course" placeholder="Course">
+    <button ng-click="addStudent()">Add Student</button>
+
+    <hr>
+
+    <table border="1" style="width:100%; border-collapse:collapse;">
+        <tr>
+            <th>Name</th><th>Age</th><th>Course</th><th>Action</th>
+        </tr>
+        <tr ng-repeat="s in students">
+            <td>{{s.name}}</td>
+            <td>{{s.age}}</td>
+            <td>{{s.course}}</td>
+            <td><button ng-click="deleteStudent(s._id)">Delete</button></td>
+        </tr>
+    </table>
+
+    <script>
+        var app = angular.module('studentApp', []);
+        app.controller('StudentController', function($scope, $http) {
+            const api = 'http://localhost:3000/api/students';
+            
+            $scope.newStudent = {}; // Initialize object
+
+            $scope.refresh = function() {
+                $http.get(api).then(res => { $scope.students = res.data; });
+            };
+
+            $scope.addStudent = function() {
+                console.log("Sending data:", $scope.newStudent); // Debugging
+                $http.post(api, $scope.newStudent).then(res => {
+                    $scope.students.push(res.data);
+                    $scope.newStudent = {}; // Clear form
+                }).catch(err => console.error("Error adding student:", err));
+            };
+
+            $scope.deleteStudent = function(id) {
+                $http.delete(api + '/' + id).then(() => {
+                    $scope.refresh();
+                });
+            };
+
+            $scope.refresh();
+        });
+    </script>
+</body>
+</html>
+
